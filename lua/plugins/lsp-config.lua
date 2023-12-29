@@ -3,7 +3,7 @@ return {
         "williamboman/mason.nvim",
         lazy = false,
         -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
-        opts = {}
+        opts = {},
     },
     {
         "williamboman/mason-lspconfig.nvim",
@@ -17,42 +17,28 @@ return {
                 -- for LSP related items. It sets the mode, buffer and description for us each time.
                 local nmap = function(keys, func, desc)
                     if desc then
-                        desc = 'LSP: ' .. desc
+                        desc = "LSP: " .. desc
                     end
 
-                    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+                    vim.keymap.set("n", keys, func, { buffer = bufnr, desc = desc })
                 end
 
-                nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-                nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+                nmap("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
+                nmap("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
 
-                nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-                nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-                nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-                nmap('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
-                nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-                nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+                nmap("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
+                nmap("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+                nmap("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
 
                 -- See `:help K` for why this keymap
-                nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-                nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+                nmap("K", vim.lsp.buf.hover, "Hover Documentation")
 
-                -- Lesser used LSP functionality
-                nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-                nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
-                nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-                nmap('<leader>wl', function()
-                    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-                end, '[W]orkspace [L]ist Folders')
-
-                -- Create a command `:Format` local to the LSP buffer
-                vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-                    vim.lsp.buf.format()
-                end, { desc = 'Format current buffer with LSP' })
+                nmap("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+                nmap("<leader>e", vim.diagnostic.open_float, "Open [E]rror message in floating window")
             end
 
             local capabilities = vim.lsp.protocol.make_client_capabilities()
-            capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+            capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
             local servers = {
                 lua_ls = {},
@@ -60,21 +46,66 @@ return {
                 svelte = {},
                 jsonls = {},
                 tailwindcss = {},
+                emmet_language_server = {},
+                html = {},
             }
 
-            local mason_lspconfig = require("mason-lspconfig")
-            mason_lspconfig.setup { ensure_installed = vim.tbl_keys(servers) }
-            mason_lspconfig.setup_handlers {
-                function(server_name)
-                    require('lspconfig')[server_name].setup {
+            local handlers = {
+                -- The first entry (without a key) will be the default handler
+                -- and will be called for each installed server that doesn't have
+                -- a dedicated handler.
+                function(server_name) -- default handler (optional)
+                    require("lspconfig")[server_name].setup({
                         capabilities = capabilities,
                         on_attach = on_attach,
                         settings = servers[server_name],
                         filetypes = (servers[server_name] or {}).filetypes,
-                    }
+                    })
+                end,
+                -- Next, you can provide targeted overrides for specific servers.
+                ["cssls"] = function()
+                    require("lspconfig").cssls.setup({
+                        capabilities = capabilities,
+                        settings = {
+                            scss = {
+                                lint = {
+                                    idSelector = "warning",
+                                    zeroUnits = "warning",
+                                    duplicateProperties = "warning",
+                                },
+                                completion = {
+                                    completePropertyWithSemicolon = true,
+                                    triggerPropertyValueCompletion = true,
+                                },
+                            },
+                        },
+                        on_attach = function(client)
+                            client.server_capabilities.document_formatting = false
+                        end,
+                    })
+                end,
+                ["tsserver"] = function()
+                    require("lspconfig").tsserver.setup({
+                        capabilities = capabilities,
+                        on_attach = function(client)
+                            client.server_capabilities.document_formatting = false
+                        end,
+                    })
+                end,
+                ["html"] = function()
+                    require("lspconfig").html.setup({
+                        capabilities = capabilities,
+                        on_attach = function(client)
+                            client.server_capabilities.document_formatting = false
+                        end,
+                    })
                 end,
             }
-        end
+
+            local mason_lspconfig = require("mason-lspconfig")
+            mason_lspconfig.setup({ ensure_installed = vim.tbl_keys(servers) })
+            mason_lspconfig.setup_handlers(handlers)
+        end,
     },
     {
         "neovim/nvim-lspconfig",
@@ -91,6 +122,6 @@ return {
             --            vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {})
             --            vim.keymap.set('n', 'gr', vim.lsp.buf.references, {})
             --            vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, {})
-        end
-    }
+        end,
+    },
 }
