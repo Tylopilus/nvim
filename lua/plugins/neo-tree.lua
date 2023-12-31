@@ -11,5 +11,17 @@ return
 
     config = function()
       vim.keymap.set('n', '<leader>pv', ':Neotree filesystem reveal left<CR>')
+      require('neo-tree').setup {
+          filesystem = {
+              follow_current_file = {
+                  enabled = true
+              }
+          },
+          buffers = {
+              follow_current_file = {
+                  enabled = true
+              }
+          }
+      }
     end
   }
