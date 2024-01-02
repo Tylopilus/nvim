@@ -52,6 +52,7 @@ return {
                 tailwindcss = {},
                 emmet_language_server = {},
                 html = {},
+                eslint = {},
             }
 
             local handlers = {
