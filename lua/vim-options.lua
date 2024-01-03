@@ -34,10 +34,10 @@ vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
 
-local augroup = vim.api.nvim_create_augroup
-local autocmd = vim.api.nvim_create_autocmd
-autocmd({ "BufWritePre" }, {
-	group = augroup("ESLintFixAll", {}),
-	pattern = "*.tsx,*.ts,*.js,*.jsx",
-	command = ":EslintFixAll",
-})
+-- local augroup = vim.api.nvim_create_augroup
+-- local autocmd = vim.api.nvim_create_autocmd
+-- autocmd({ "BufWritePre" }, {
+-- 	group = augroup("ESLintFixAll", {}),
+-- 	pattern = "*.tsx,*.ts,*.js,*.jsx",
+-- 	command = ":EslintFixAll",
+-- })

@@ -1,5 +1,6 @@
 return {
   "ahmedkhalf/project.nvim",
+  cond = not vim.g.vscode, 
   lazy = false,
   config = function()
     require("project_nvim").setup {

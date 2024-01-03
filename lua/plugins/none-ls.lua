@@ -1,5 +1,6 @@
 return {
     "nvimtools/none-ls.nvim",
+    cond = not vim.g.vscode, 
     config = function()
         local null_ls = require("null-ls")
         null_ls.setup({

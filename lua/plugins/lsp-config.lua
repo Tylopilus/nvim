@@ -1,12 +1,14 @@
 return {
     {
         "williamboman/mason.nvim",
+        cond = not vim.g.vscode, 
         lazy = false,
         -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
         opts = {},
     },
     {
         "williamboman/mason-lspconfig.nvim",
+        cond = not vim.g.vscode, 
         config = function()
             local on_attach = function(_, bufnr)
                 -- NOTE: Remember that lua is a real programming language, and as such it is possible
@@ -114,6 +116,7 @@ return {
     },
     {
         "neovim/nvim-lspconfig",
+        cond = not vim.g.vscode, 
         lazy = false,
         config = function()
             --            local lspconfig = require("lspconfig")
