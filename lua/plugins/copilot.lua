@@ -1,6 +1,6 @@
 return {
     "zbirenbaum/copilot.lua",
-    cond = not vim.g.vscode, 
+    cond = not vim.g.vscode,
     config = function()
         require("copilot").setup({
             suggestion = {

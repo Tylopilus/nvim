@@ -1,3 +1,3 @@
 return {
-    { 'folke/which-key.nvim', opts = {}, cond = not vim.g.vscode },
+    { "folke/which-key.nvim", opts = {}, cond = not vim.g.vscode },
 }
