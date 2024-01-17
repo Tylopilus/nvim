@@ -11,6 +11,7 @@ return {
 
     config = function()
         vim.keymap.set("n", "<leader>pv", ":Neotree filesystem reveal left<CR>")
+        vim.keymap.set("n", "<C-n>", ":Neotree toggle<CR>")
         require("neo-tree").setup({
             filesystem = {
                 follow_current_file = {
