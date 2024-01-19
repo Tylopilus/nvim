@@ -13,6 +13,7 @@ vim.opt.smartindent = true
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
 vim.opt.scrolloff = 8
+vim.opt.wrap = false
 
 -- Navigate vim panes better
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
@@ -27,3 +28,7 @@ vim.keymap.set('n', "B", "_")
 vim.keymap.set('n', "E", "$")
 
 vim.keymap.set("i", "<C-c>", "<Esc>")
+vim.keymap.set("n", "Y", '"+y')
+vim.keymap.set("v", "Y", '"+y')
+vim.keymap.set("n", "yY", '"+y$')
+
