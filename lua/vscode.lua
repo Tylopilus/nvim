@@ -27,18 +27,24 @@ keymap("n", "gr", notify("editor.action.goToReferences"), { silent = true })
 keymap("n", "<Leader>rn", notify("editor.action.rename"), { silent = true })
 keymap("n", "<Leader>f", notify("editor.action.formatDocument"), { silent = true })
 keymap("n", "<Leader>ca", notify("editor.action.refactor"), { silent = true })                   -- language code actions
+keymap("n", "<Leader>ai", notify("workbench.panel.chat.view.copilot.focus"), { silent = true })                   -- language code actions
 
 keymap("n", "<Leader>rg", notify("workbench.action.findInFiles"), { silent = true })             -- use ripgrep to search files
 keymap("n", "<Leader>ts", notify("workbench.action.toggleSidebarVisibility"), { silent = true })
 keymap("n", "<Leader>th", notify("workbench.action.toggleAuxiliaryBar"), { silent = true })      -- toggle docview (help page)
 keymap("n", "<Leader>tp", notify("workbench.action.togglePanel"), { silent = true })
-keymap("n", "<Leader>fc", notify("workbench.action.showCommands"), { silent = true })            -- find commands
-keymap("n", "<Leader>ff", notify("workbench.action.quickOpen"), { silent = true })               -- find files
 keymap("n", "<Leader>tw", notify("workbench.action.terminal.toggleTerminal"), { silent = true }) -- terminal window
 
 keymap("v", "<Leader>f", v_notify("editor.action.formatSelection"), { silent = true })
 keymap("v", "<Leader>ca", v_notify("editor.action.refactor"), { silent = true })
 keymap("v", "<Leader>fc", v_notify("workbench.action.showCommands"), { silent = true })
+
+-- vscode harpoon config
+keymap('n', '<leader>ad', notify("vscode-harpoon.addEditor"), { silent = true })
+keymap('n', '<C-e>', notify("vscode-harpoon.editEditors"), { silent = true })
+keymap('n', '<C-j>', notify("vscode-harpoon.gotoEditor1"), { silent = true })
+keymap('n', '<C-k>', notify("vscode-harpoon.gotoEditor2"), { silent = true })
+keymap('n', '<C-l>', notify("vscode-harpoon.gotoEditor3"), { silent = true })
 
 -- nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
 -- nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>

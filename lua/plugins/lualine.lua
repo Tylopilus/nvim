@@ -4,7 +4,8 @@ return {
     config = function()
         require("lualine").setup({
             options = {
-                theme = "poimandres",
+                -- theme = "poimandres",
+                theme = "github_dark",
             },
         })
     end,
