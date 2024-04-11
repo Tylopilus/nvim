@@ -1,6 +1,7 @@
 return {
     {
         "pmizio/typescript-tools.nvim",
+        cond = not vim.g.vscode,
         dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
         opts = {},
     },
@@ -40,7 +41,7 @@ return {
                 -- See `:help K` for why this keymap
                 nmap("K", vim.lsp.buf.hover, "Hover Documentation")
 
-                nmap("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+                nmap("gD", "<cmd>:TSToolsGoToSourceDefinition<CR>", "[G]oto Source [D]efinition")
                 nmap("<leader>e", vim.diagnostic.open_float, "Open [E]rror message in floating window")
             end
 
