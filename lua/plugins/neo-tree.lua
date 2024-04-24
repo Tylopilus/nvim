@@ -10,7 +10,8 @@ return {
 	},
 
 	config = function()
-		vim.keymap.set("n", "<leader>pv", "<cmd>:Neotree position=current<CR>")
+      -- vim.keymap.set("n", "<leader>pv", "<cmd>:Neotree position=current<CR>")
+        vim.keymap.set("n", "<leader>pv", "<cmd>:Neotree position=current reveal_force_cwd<cr>")
 		require("neo-tree").setup({
 			default_component_configs = {
 				window = {
@@ -23,6 +24,11 @@ return {
 				},
                 hijack_netrw_behavior = "open_current"
 			},
+            buffers = {
+              follow_current_file = {
+                enabled = true,
+              },
+            }
 		})
 	end,
 }
