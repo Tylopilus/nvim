@@ -18,7 +18,7 @@ return {
         },
         mappings = {
           i = {
-            ["<C-p>"] = require("telescope.actions.layout").toggle_preview,
+            ["<C-_>"] = require("telescope.actions.layout").toggle_preview,
           },
         },
         preview = {
@@ -51,8 +51,8 @@ return {
     require("telescope").load_extension("live_grep_args")
     local builtin = require("telescope.builtin")
     vim.keymap.set("n", "<C-p>", builtin.find_files, {})
-    vim.keymap.set("n", "<leader>/", builtin.live_grep, {})
-    vim.keymap.set("n", "?", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {})
+    vim.keymap.set("n", "<leader>/", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {})
+    vim.keymap.set("n", "?", builtin.lsp_document_symbols, {})
     vim.keymap.set("n", "<leader><space>", builtin.buffers, { desc = "[ ] Find existing buffers" })
   end,
 }
