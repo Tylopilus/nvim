@@ -64,4 +64,3 @@ local config = {
 	},
 }
 require("jdtls").start_or_attach(config)
-vim.keymap.set('n', '<leader>co', "<Cmd>lua require'jdtls'.organize_imports()<CR>", { desc = 'Organize Imports' })
