@@ -22,7 +22,9 @@ return {
 				follow_current_file = {
 					enabled = true,
 				},
-                hijack_netrw_behavior = "open_current"
+                hijack_netrw_behavior = "open_current",
+                group_empty_dirs = true,
+                scan_mode = "deep",
 			},
             buffers = {
               follow_current_file = {

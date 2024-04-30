@@ -12,6 +12,7 @@ return {
 
 		-- see below for full list of optional dependencies 👇
 	},
+	cond = not vim.g.vscode,
 	config = function()
 		require("obsidian").setup({
 			-- A list of workspace names, paths, and configuration overrides.
@@ -110,7 +111,7 @@ return {
 			--  * "use_path_only", e.g. '[[foo-bar.md]]'
 			-- Or you can set it to a function that takes a table of options and returns a string, like this:
 			wiki_link_func = "use_path_only",
-            markdown_link_func = "use_alias_only",
+			markdown_link_func = "use_alias_only",
 
 			-- Either 'wiki' or 'markdown'.
 			preferred_link_style = "wiki",

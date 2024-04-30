@@ -24,6 +24,12 @@ return {
         preview = {
           hide_on_startup = true, -- hide previewer when picker starts
         },
+        path_display = {
+          trunctate = 2,
+          filename_first = {
+            reverse_directories = false,
+          },
+        },
       },
       pickers = {
         buffers = {
