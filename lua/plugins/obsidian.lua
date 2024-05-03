@@ -14,6 +14,7 @@ return {
 	},
 	cond = not vim.g.vscode,
 	config = function()
+		vim.opt.conceallevel = 1
 		require("obsidian").setup({
 			-- A list of workspace names, paths, and configuration overrides.
 			-- If you use the Obsidian app, the 'path' of a workspace should generally be
