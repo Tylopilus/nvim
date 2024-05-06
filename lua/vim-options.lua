@@ -27,6 +27,8 @@ vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set('n', "B", "_")
 vim.keymap.set('n', "E", "$")
+vim.keymap.set('v', "B", "_")
+vim.keymap.set('v', "E", "$")
 
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("n", "Y", '"+y')

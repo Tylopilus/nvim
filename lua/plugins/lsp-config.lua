@@ -105,6 +105,14 @@ return {
 									triggerPropertyValueCompletion = true,
 								},
 							},
+                            css = {
+                                lint = {
+                                    unknownAtRules = "warning",
+                                    invalidProperties = "warning",
+                                    emptyRules = "warning",
+                                },
+                                validate = false,
+                            },
 						},
 						on_attach = function(client)
 							client.server_capabilities.document_formatting = false
