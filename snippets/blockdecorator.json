@@ -1,0 +1,11 @@
+{
+  "block decorate default export": {
+    "prefix": "!deco",
+    "body": [
+      "/** @param {HTMLElement} main */",
+      "export default async function decorate(main) {",
+      "  $0",
+      "}"
+    ]
+  }
+}

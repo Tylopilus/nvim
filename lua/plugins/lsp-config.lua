@@ -44,6 +44,7 @@ return {
 
 				nmap("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
 				nmap("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
+                nmap("<leader>cq", vim.diagnostic.setloclist, "[C]ode [Q]uickfix")
 
 				nmap("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
 				nmap("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
