@@ -46,6 +46,9 @@ keymap('n', '<C-j>', notify("vscode-harpoon.gotoEditor1"), { silent = true })
 keymap('n', '<C-k>', notify("vscode-harpoon.gotoEditor2"), { silent = true })
 keymap('n', '<C-l>', notify("vscode-harpoon.gotoEditor3"), { silent = true })
 
+-- lazygit
+keymap('n', '<leader>g', notify("lazygit.openLazygit"), { silent = true })
+
 -- nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
 -- nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
 -- nnoremap zc :call VSCodeNotify('editor.fold')<CR>
