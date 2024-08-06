@@ -12,18 +12,18 @@ return {
       })
     end,
   },
-  {
-  	"mfussenegger/nvim-jdtls",
-  	cond = not vim.g.vscode,
-  },
-  --
   -- {
-  --   'nvim-java/nvim-java',
-  --   cond = not vim.g.vscode,
-  --   -- config = function()
-  --   --   require('java').setup()
-  --   -- end
+  -- 	"mfussenegger/nvim-jdtls",
+  -- 	cond = not vim.g.vscode,
   -- },
+  --
+  {
+    'nvim-java/nvim-java',
+    cond = not vim.g.vscode,
+    -- config = function()
+    --   require('java').setup()
+    -- end
+  },
   {
     "williamboman/mason.nvim",
     cond = not vim.g.vscode,
@@ -139,6 +139,7 @@ return {
 					}) ]]
         end,
         ["jdtls"] = function()
+          require("java").setup()
           require("lspconfig").jdtls.setup({
             capabilities = capabilities,
             on_attach = function(client, buffer)
