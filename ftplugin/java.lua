@@ -2,8 +2,11 @@ if not vim.g.vscode then
   local registry = require("mason-registry")
   local home = os.getenv("HOME")
   local workspace_path = home .. "/.local/share/nvim/jdtls-workspace/"
+  local masonPath = require("mason.settings").current.install_root_dir
+  print("Mason home folder: " .. masonPath)
   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
   local workspace_dir = workspace_path .. project_name
+  local lombokPath = masonPath .. "/packages/lombok-nightly/lombok.jar"
 
   local status, jdtls = pcall(require, "jdtls")
   if not status then
@@ -26,7 +29,7 @@ if not vim.g.vscode then
       "java.base/java.util=ALL-UNNAMED",
       "--add-opens",
       "java.base/java.lang=ALL-UNNAMED",
-      "-javaagent:" .. jdtls_install .. "/lombok.jar",
+      "-javaagent:" .. lombokPath,
       "-jar",
       vim.trim(vim.fn.glob(jdtls_install .. "/plugins/org.eclipse.equinox.launcher_*.jar")),
       "-configuration",
