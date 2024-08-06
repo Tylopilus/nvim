@@ -139,27 +139,24 @@ return {
 					}) ]]
         end,
         ["jdtls"] = function()
-          -- require('java').setup {
-          --   -- Your custom jdtls settings goes here
-          -- }
-          -- require("lspconfig").jdtls.setup({
-          --   capabilities = capabilities,
-          --   on_attach = function(client, buffer)
-          --     on_attach(client, buffer)
-          --     vim.keymap.set(
-          --       "n",
-          --       "<leader>co",
-          --       "<Cmd>lua require'jdtls'.organize_imports()<CR>",
-          --       { desc = "Organize Imports" }
-          --     )
-          --   end,
-          --   commands = {
-          --     OrganizeImports = {
-          --       organize_imports_java,
-          --       description = "Organize Imports",
-          --     },
-          --   },
-          -- })
+          require("lspconfig").jdtls.setup({
+            capabilities = capabilities,
+            on_attach = function(client, buffer)
+              on_attach(client, buffer)
+              vim.keymap.set(
+                "n",
+                "<leader>co",
+                "<Cmd>lua require'jdtls'.organize_imports()<CR>",
+                { desc = "Organize Imports" }
+              )
+            end,
+            commands = {
+              OrganizeImports = {
+                organize_imports_java,
+                description = "Organize Imports",
+              },
+            },
+          })
         end,
         ["html"] = function()
           require("lspconfig").html.setup({
