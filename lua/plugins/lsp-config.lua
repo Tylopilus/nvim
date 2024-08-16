@@ -18,7 +18,7 @@ return {
   -- },
   --
   {
-    'nvim-java/nvim-java',
+    "nvim-java/nvim-java",
     cond = not vim.g.vscode,
     -- config = function()
     --   require('java').setup()
@@ -132,11 +132,11 @@ return {
         end,
         ["tsserver"] = function()
           --[[ require("lspconfig").tsserver.setup({
-						capabilities = capabilities,
-						on_attach = function(client)
-							client.server_capabilities.document_formatting = false
-						end,
-					}) ]]
+            capabilities = capabilities,
+            on_attach = function(client)
+              client.server_capabilities.document_formatting = false
+            end,
+          }) ]]
         end,
         ["jdtls"] = function()
           require("java").setup()
@@ -171,7 +171,6 @@ return {
           require("lspconfig").eslint.setup({
             capabilities = capabilities,
             on_attach = function(_, bufnr)
-              print("eslint on_attach")
               vim.api.nvim_create_autocmd("BufWritePre", {
                 buffer = bufnr,
                 command = "EslintFixAll",
