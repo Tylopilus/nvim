@@ -1,4 +1,4 @@
 return {
-    "tpope/vim-surround",
-    -- cond = not vim.g.vscode, 
+  "tpope/vim-surround",
+  -- cond = not vim.g.vscode,
 }

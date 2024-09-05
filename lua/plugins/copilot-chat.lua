@@ -18,30 +18,30 @@ return {
 				desc = "CopilotChat - Help actions",
 			},
 			-- Show prompts actions with telescope
-			{
-				"<leader>ae",
-				function()
-					local actions = require("CopilotChat.actions")
-					actions.pick(actions.prompt_actions({
-						selection = require("CopilotChat.select").visual,
-					}))
-				end,
-				-- Pick a prompt using vim.ui.select
-				mode = "v",
-				desc = "CopilotChat - Prompt actions (visual)",
-			},
-			{
-				"<leader>ae",
-				function()
-					local actions = require("CopilotChat.actions")
-					actions.pick(actions.prompt_actions({
-						selection = require("CopilotChat.select").buffer,
-					}))
-				end,
-				-- Pick a prompt using vim.ui.select
-				mode = "n",
-				desc = "CopilotChat - Prompt actions",
-			},
+			-- {
+			-- 	"<leader>ae",
+			-- 	function()
+			-- 		local actions = require("CopilotChat.actions")
+			-- 		actions.pick(actions.prompt_actions({
+			-- 			selection = require("CopilotChat.select").visual,
+			-- 		}))
+			-- 	end,
+			-- 	-- Pick a prompt using vim.ui.select
+			-- 	mode = "v",
+			-- 	desc = "CopilotChat - Prompt actions (visual)",
+			-- },
+			-- {
+			-- 	"<leader>ae",
+			-- 	function()
+			-- 		local actions = require("CopilotChat.actions")
+			-- 		actions.pick(actions.prompt_actions({
+			-- 			selection = require("CopilotChat.select").buffer,
+			-- 		}))
+			-- 	end,
+			-- 	-- Pick a prompt using vim.ui.select
+			-- 	mode = "n",
+			-- 	desc = "CopilotChat - Prompt actions",
+			-- },
 		},
 	},
 }
