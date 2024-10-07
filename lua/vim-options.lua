@@ -5,7 +5,7 @@ vim.opt.relativenumber = true
 
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
-vim.opt.shiftwidth = 2
+vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 
 vim.opt.smartindent = true
@@ -25,13 +25,12 @@ vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
-vim.keymap.set('n', "B", "_")
-vim.keymap.set('n', "E", "$")
-vim.keymap.set('v', "B", "_")
-vim.keymap.set('v', "E", "$")
+vim.keymap.set("n", "B", "_")
+vim.keymap.set("n", "E", "$")
+vim.keymap.set("v", "B", "_")
+vim.keymap.set("v", "E", "$")
 
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("n", "Y", '"+y')
 vim.keymap.set("v", "Y", '"+y')
 vim.keymap.set("n", "yY", '"+y$')
-

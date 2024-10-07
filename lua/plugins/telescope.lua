@@ -40,7 +40,8 @@ return {
         live_grep_args = {
           auto_quoting = true, -- enable/disable auto-quoting
           additional_args = {
-            "--fixed-strings"
+            "--fixed-strings",
+            "--hidden"
           },
           -- define mappings, e.g.
           mappings = {    -- extend mappings

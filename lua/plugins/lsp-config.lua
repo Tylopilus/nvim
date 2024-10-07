@@ -1,4 +1,5 @@
 return { -- LSP Configuration & Plugins
+	cond = not vim.g.vscode,
 	"neovim/nvim-lspconfig",
 	dependencies = {
 		-- Automatically install LSPs and related tools to stdpath for Neovim
@@ -24,6 +25,20 @@ return { -- LSP Configuration & Plugins
 			},
 		},
 		{ "Bilal2453/luvit-meta", lazy = true },
+		{
+			"pmizio/typescript-tools.nvim",
+			dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+			opts = {},
+			config = function()
+				require("typescript-tools").setup({
+					handlers = {
+						["textDocument/publishDiagnostics"] = require("typescript-tools.api").filter_diagnostics({
+							80001,
+						}),
+					},
+				})
+			end,
+		},
 	},
 	config = function()
 		vim.api.nvim_create_autocmd("LspAttach", {
@@ -74,6 +89,7 @@ return { -- LSP Configuration & Plugins
 				-- WARN: This is not Goto Definition, this is Goto Declaration.
 				--  For example, in C this would take you to the header.
 				map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+				map("<leader>e", vim.diagnostic.open_float, "Open [E]rror message in floating window")
 
 				-- The following two autocommands are used to highlight references of the
 				-- word under your cursor when your cursor rests there for a little while.
@@ -197,6 +213,7 @@ return { -- LSP Configuration & Plugins
 						-- Your custom nvim-java configuration goes here
 					})
 				end,
+				ts_ls = function() end,
 			},
 		})
 	end,
