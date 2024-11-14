@@ -30,7 +30,7 @@ return {
 			debug = false,
 			sources = {
 				null_ls.builtins.formatting.stylua,
-				null_ls.builtins.formatting.prettier,
+				-- null_ls.builtins.formatting.prettier,
 				prettier_java,
 			},
 		})

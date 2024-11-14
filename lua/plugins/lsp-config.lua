@@ -7,6 +7,7 @@ return { -- LSP Configuration & Plugins
 		"williamboman/mason-lspconfig.nvim",
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
 		"nvim-java/nvim-java",
+		-- "https://gitlab.com/schrieveslaach/sonarlint.nvim",
 
 		-- Useful status updates for LSP.
 		-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -25,20 +26,20 @@ return { -- LSP Configuration & Plugins
 			},
 		},
 		{ "Bilal2453/luvit-meta", lazy = true },
-		{
-			"pmizio/typescript-tools.nvim",
-			dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-			opts = {},
-			config = function()
-				require("typescript-tools").setup({
-					handlers = {
-						["textDocument/publishDiagnostics"] = require("typescript-tools.api").filter_diagnostics({
-							80001,
-						}),
-					},
-				})
-			end,
-		},
+		-- {
+		-- 	"pmizio/typescript-tools.nvim",
+		-- 	dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+		-- 	opts = {},
+		-- 	config = function()
+		-- 		require("typescript-tools").setup({
+		-- 			handlers = {
+		-- 				["textDocument/publishDiagnostics"] = require("typescript-tools.api").filter_diagnostics({
+		-- 					80001,
+		-- 				}),
+		-- 			},
+		-- 		})
+		-- 	end,
+		-- },
 	},
 	config = function()
 		vim.api.nvim_create_autocmd("LspAttach", {
@@ -163,6 +164,31 @@ return { -- LSP Configuration & Plugins
 					},
 				},
 			},
+			biome = {
+				-- Biome configuration
+				cmd = { "biome", "lsp-proxy" },
+				root_dir = require("lspconfig").util.root_pattern("biome.json", "package.json"),
+				single_file_support = true,
+			},
+			ts_ls = {
+				on_attach = function(client, _)
+					-- Disable `tsserver`'s formatting capability
+					client.server_capabilities.documentFormattingProvider = false
+					client.server_capabilities.documentRangeFormattingProvider = false
+				end,
+				settings = {
+					javascript = {
+						format = {
+							enable = false,
+						},
+					},
+					typescript = {
+						format = {
+							enable = false,
+						},
+					},
+				},
+			},
 		}
 
 		-- Ensure the servers and tools above are installed
@@ -196,18 +222,8 @@ return { -- LSP Configuration & Plugins
 						-- Your custom jdtls settings goes here
 					})
 
-					require("lspconfig").jdtls.setup({
-						-- Your custom nvim-java configuration goes here
-						settings = {
-							java = {
-								format = {
-									enabled = false,
-								},
-							},
-						},
-					})
+					require("lspconfig").jdtls.setup({})
 				end,
-				ts_ls = function() end,
 			},
 		})
 	end,
