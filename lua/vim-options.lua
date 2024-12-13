@@ -15,6 +15,7 @@ vim.opt.incsearch = true
 vim.opt.scrolloff = 8
 vim.opt.wrap = false
 vim.opt.textwidth = 80
+vim.diagnostic.config({virtual_text=false})
 
 -- Navigate vim panes better
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")

@@ -108,9 +108,28 @@ return {
 				replace = true,
 			}, dingllm.make_anthropic_spec_curl_args, dingllm.handle_anthropic_spec_data)
 		end
+		local function openrouter_help()
+			dingllm.invoke_llm_and_stream_into_editor({
+				url = "https://openrouter.ai/api/v1/chat/completions",
+				model = "qwen/qwen-2.5-coder-32b-instruct",
+				api_key_name = "OPENROUTER_API_KEY",
+				system_prompt = helpful_prompt,
+				replace = false,
+			}, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
+		end
 
-		vim.keymap.set({ "n", "v" }, "<leader>k", groq_replace, { desc = "llm groq" })
-		vim.keymap.set({ "n", "v" }, "<leader>K", groq_help, { desc = "llm groq_help" })
+		local function openrouter_replace()
+			dingllm.invoke_llm_and_stream_into_editor({
+				url = "https://openrouter.ai/api/v1/chat/completions",
+				model = "qwen/qwen-2.5-coder-32b-instruct",
+				api_key_name = "OPENROUTER_API_KEY",
+				system_prompt = system_prompt,
+				replace = true,
+			}, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
+		end
+
+		vim.keymap.set({ "n", "v" }, "<leader>k", openrouter_replace, { desc = "llm openrouter" })
+		vim.keymap.set({ "n", "v" }, "<leader>K", openrouter_help, { desc = "llm openrouter_help" })
 		vim.keymap.set({ "n", "v" }, "<leader>L", llama405b_help, { desc = "llm llama405b_help" })
 		vim.keymap.set({ "n", "v" }, "<leader>l", llama405b_replace, { desc = "llm llama405b_replace" })
 		vim.keymap.set({ "n", "v" }, "<leader>I", anthropic_help, { desc = "llm anthropic_help" })

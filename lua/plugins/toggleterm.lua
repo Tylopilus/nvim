@@ -2,7 +2,7 @@ return {
 	{
 		"akinsho/toggleterm.nvim",
 		cond = not vim.g.vscode,
-		version = "*",
+		tag = "*",
 		config = function()
 			function _G.set_terminal_keymaps()
 				local opts = { buffer = 0 }
