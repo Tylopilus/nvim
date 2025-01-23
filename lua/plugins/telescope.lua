@@ -61,7 +61,7 @@ return {
 		require("telescope").load_extension("live_grep_args")
 		local builtin = require("telescope.builtin")
 		vim.keymap.set("n", "<C-p>", builtin.find_files, {})
-		vim.keymap.set("n", "<leader>/", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {})
+		vim.keymap.set("n", "<leader>/", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {desc = "Search across all files"})
 		vim.keymap.set("n", "?", builtin.grep_string, {})
 		vim.keymap.set("n", "<leader><space>", builtin.buffers, { desc = "[ ] Find existing buffers" })
 	end,

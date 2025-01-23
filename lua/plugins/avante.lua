@@ -4,7 +4,8 @@ return {
 	build = "make",
 	opts = {
 		-- add any opts here
-		provider = "openai",
+		-- provider = "openai",
+        provider = "claude",
 		openai = {
 			endpoint = "https://openrouter.ai/api/v1",
 			model = "qwen/qwen-2.5-coder-32b-instruct",

@@ -35,3 +35,16 @@ vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("n", "Y", '"+y')
 vim.keymap.set("v", "Y", '"+y')
 vim.keymap.set("n", "yY", '"+y$')
+-- Quickfix list
+vim.keymap.set("n", "<leader>qq", vim.diagnostic.setqflist, { desc = "Open diagnostics in [q]uickfix list"});
+vim.keymap.set("n", "<C-[>", "<cmd>:cprevious<CR>", {desc = "Go previous entry in quickfix list"})
+vim.keymap.set("n", "<C-]>", "<cmd>:cnext<CR>", {desc = "Go next entry in quickfix list"})
+vim.keymap.set('n', '<C-\\>', function()
+    for _, win in pairs(vim.fn.getwininfo()) do
+        if win.quickfix == 1 then
+            vim.cmd('cclose')
+            return
+        end
+    end
+    vim.cmd('copen')
+end)
