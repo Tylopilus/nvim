@@ -1,6 +1,7 @@
 return {
 	"nvim-telescope/telescope.nvim",
-	commit = "dc6fc321a5ba076697cca89c9d7ea43153276d81",
+	-- commit = "dc6fc321a5ba076697cca89c9d7ea43153276d81",
+    tag = '0.1.8',
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope-live-grep-args.nvim",

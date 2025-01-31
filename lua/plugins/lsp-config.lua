@@ -7,7 +7,7 @@ return { -- LSP Configuration & Plugins
 		"williamboman/mason-lspconfig.nvim",
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
 		"nvim-java/nvim-java",
-		-- "https://gitlab.com/schrieveslaach/sonarlint.nvim",
+		"https://gitlab.com/schrieveslaach/sonarlint.nvim",
 
 		-- Useful status updates for LSP.
 		-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -261,6 +261,28 @@ return { -- LSP Configuration & Plugins
 						end,
 					})
 				end,
+			},
+		})
+		require("sonarlint").setup({
+			server = {
+				cmd = {
+					"sonarlint-language-server",
+					-- Ensure that sonarlint-language-server uses stdio channel
+					"-stdio",
+					"-analyzers",
+					-- paths to the analyzers you need, using those for python and java in this example
+					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarpython.jar"),
+					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarcfamily.jar"),
+					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarjava.jar"),
+					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarhtml.jar"),
+				},
+			},
+			filetypes = {
+				-- Tested and working
+				"java",
+				"html",
+				"python",
+				"cpp",
 			},
 		})
 	end,
