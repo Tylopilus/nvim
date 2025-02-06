@@ -164,27 +164,6 @@ return { -- LSP Configuration & Plugins
 					},
 				},
 			},
-			--[[ biome = {
-                -- Biome configuration
-                cmd = { "biome", "lsp-proxy" },
-                root_dir = require("lspconfig").util.root_pattern("biome.json", "package.json"),
-                single_file_support = true,
-                settings = {
-                    linter = {
-                        rules = {
-                            style = {
-                                noNonNullAssertion = "off",
-                            },
-                            complexity = {
-                                noForEach = "off",
-                            },
-                        },
-                    },
-                },
-                organize_imports = {
-                    enabled = false
-                }
-            }, ]]
 			ts_ls = {
 				on_attach = function(client, _)
 					-- Disable `tsserver`'s formatting capability
@@ -263,6 +242,7 @@ return { -- LSP Configuration & Plugins
 				end,
 			},
 		})
+
 		require("sonarlint").setup({
 			server = {
 				cmd = {
@@ -275,6 +255,13 @@ return { -- LSP Configuration & Plugins
 					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarcfamily.jar"),
 					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarjava.jar"),
 					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarhtml.jar"),
+				},
+				settings = {
+					sonarlint = {
+						rules = {
+							["java:S1075"] = { level = "off" },
+						},
+					},
 				},
 			},
 			filetypes = {
