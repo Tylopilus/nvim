@@ -1,7 +1,7 @@
 return {
 	"nvim-telescope/telescope.nvim",
 	-- commit = "dc6fc321a5ba076697cca89c9d7ea43153276d81",
-    tag = '0.1.8',
+	tag = "0.1.8",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope-live-grep-args.nvim",
@@ -61,8 +61,19 @@ return {
 		})
 		require("telescope").load_extension("live_grep_args")
 		local builtin = require("telescope.builtin")
-		vim.keymap.set("n", "<C-p>", builtin.find_files, {})
-		vim.keymap.set("n", "<leader>/", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {desc = "Search across all files"})
+		vim.keymap.set("n", "<C-p>", function()
+			require("telescope.builtin").find_files({
+				hidden = true,
+				find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" },
+				file_ignore_patterns = {}, -- This will still respect .gitignore
+			})
+		end, { desc = "Find files by name" })
+		vim.keymap.set(
+			"n",
+			"<leader>/",
+			":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
+			{ desc = "Search across all files" }
+		)
 		vim.keymap.set("n", "?", builtin.grep_string, {})
 		vim.keymap.set("n", "<leader><space>", builtin.buffers, { desc = "[ ] Find existing buffers" })
 	end,

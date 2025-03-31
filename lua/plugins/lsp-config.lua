@@ -191,6 +191,19 @@ return { -- LSP Configuration & Plugins
 					})
 				end,
 			},
+			jdtls = {
+				settings = {
+					java = {
+						compile = {
+							nullAnalysis = {
+								mode = "automatic",
+								nonnull = "org.eclipse.jdt.annotation.Nonnull",
+								nullable = "org.eclipse.jdt.annotation.Nullable",
+							},
+						},
+					},
+				},
+			},
 		}
 
 		-- Ensure the servers and tools above are installed
@@ -224,7 +237,13 @@ return { -- LSP Configuration & Plugins
 						-- Your custom jdtls settings goes here
 					})
 
-					require("lspconfig").jdtls.setup({})
+					require("lspconfig").jdtls.setup({
+						handlers = {
+							-- By assigning an empty function, you can remove the notifications
+							-- printed to the cmd
+							["$/progress"] = function(_, result, ctx) end,
+						},
+					})
 				end,
 				stylelint_lsp = function()
 					require("lspconfig").stylelint_lsp.setup({

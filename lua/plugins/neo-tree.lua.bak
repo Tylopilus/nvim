@@ -11,7 +11,7 @@ return {
 
   config = function()
     -- vim.keymap.set("n", "<leader>pv", "<cmd>:Neotree position=current<CR>")
-    vim.keymap.set("n", "<leader>pv", "<cmd>:Neotree position=current reveal_force_cwd<cr>")
+    -- vim.keymap.set("n", "<leader>pv", "<cmd>:Neotree position=current reveal_force_cwd<cr>")
     require("neo-tree").setup({
       default_component_configs = {
         window = {
