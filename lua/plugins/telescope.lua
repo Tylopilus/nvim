@@ -1,10 +1,11 @@
 return {
 	"nvim-telescope/telescope.nvim",
 	-- commit = "dc6fc321a5ba076697cca89c9d7ea43153276d81",
-	tag = "0.1.8",
+	-- tag = "0.1.8",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope-live-grep-args.nvim",
+		"nvim-telescope/telescope-ui-select.nvim"
 	},
 	cond = not vim.g.vscode,
 	config = function()
@@ -59,6 +60,7 @@ return {
 				},
 			},
 		})
+		require("telescope").load_extension("ui-select")
 		require("telescope").load_extension("live_grep_args")
 		local builtin = require("telescope.builtin")
 		vim.keymap.set("n", "<C-p>", function()

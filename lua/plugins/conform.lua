@@ -28,6 +28,7 @@ return {
 			css = { "prettierd", "prettier", stop_after_first = true },
 			scss = { "prettierd", "prettier", stop_after_first = true },
 			java = { "prettierd", "prettier", stop_after_first = true },
+			yaml = { "prettierd", "prettier", stop_after_first = true },
 		},
 		-- Set default options
 		default_format_opts = {
