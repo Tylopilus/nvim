@@ -85,7 +85,7 @@ return { -- LSP Configuration & Plugins
 
 				-- Execute a code action, usually your cursor needs to be on top of an error
 				-- or a suggestion from your LSP for this to activate.
-				map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
+				map("<leader>ca", "<Cmd>lua vim.lsp.buf.code_action()<cr>", "[C]ode [A]ction")
 
 				-- WARN: This is not Goto Definition, this is Goto Declaration.
 				--  For example, in C this would take you to the header.
@@ -276,34 +276,34 @@ return { -- LSP Configuration & Plugins
 			},
 		})
 
-		require("sonarlint").setup({
-			server = {
-				cmd = {
-					"sonarlint-language-server",
-					-- Ensure that sonarlint-language-server uses stdio channel
-					"-stdio",
-					"-analyzers",
-					-- paths to the analyzers you need, using those for python and java in this example
-					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarpython.jar"),
-					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarcfamily.jar"),
-					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarjava.jar"),
-					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarhtml.jar"),
-				},
-				settings = {
-					sonarlint = {
-						rules = {
-							["java:S1075"] = { level = "off" },
-						},
-					},
-				},
-			},
-			filetypes = {
-				-- Tested and working
-				"java",
-				"html",
-				"python",
-				"cpp",
-			},
-		})
+		-- require("sonarlint").setup({
+		-- 	server = {
+		-- 		cmd = {
+		-- 			"sonarlint-language-server",
+		-- 			-- Ensure that sonarlint-language-server uses stdio channel
+		-- 			"-stdio",
+		-- 			"-analyzers",
+		-- 			-- paths to the analyzers you need, using those for python and java in this example
+		-- 			vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarpython.jar"),
+		-- 			vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarcfamily.jar"),
+		-- 			vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarjava.jar"),
+		-- 			vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarhtml.jar"),
+		-- 		},
+		-- 		settings = {
+		-- 			sonarlint = {
+		-- 				rules = {
+		-- 					["java:S1075"] = { level = "off" },
+		-- 				},
+		-- 			},
+		-- 		},
+		-- 	},
+		-- 	filetypes = {
+		-- 		-- Tested and working
+		-- 		"java",
+		-- 		"html",
+		-- 		"python",
+		-- 		"cpp",
+		-- 	},
+		-- })
 	end,
 }
