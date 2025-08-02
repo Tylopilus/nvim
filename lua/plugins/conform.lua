@@ -29,6 +29,7 @@ return {
 			scss = { "prettierd", "prettier", stop_after_first = true },
 			java = { "prettierd", "prettier", stop_after_first = true },
 			yaml = { "prettierd", "prettier", stop_after_first = true },
+			xml = { "xmlformatter", lsp_format = "last", stop_after_first = false },
 		},
 		-- Set default options
 		default_format_opts = {
@@ -40,6 +41,9 @@ return {
 		formatters = {
 			shfmt = {
 				prepend_args = { "-i", "2" },
+			},
+			xmlformatter = {
+				prepend_args = { "--selfclose", "--blank" },
 			},
 		},
 	},

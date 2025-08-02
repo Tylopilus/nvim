@@ -43,20 +43,6 @@ vim.api.nvim_create_user_command("JavaInterface", function()
 	create_java_boilerplate("interface")
 end, {})
 
--- Autocommand to set up Java-specific completion
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "java",
-	callback = function()
-		local cmp = require("cmp")
-		cmp.setup.buffer({
-			sources = cmp.config.sources({
-				{ name = "nvim_lsp" },
-				{ name = "path" },
-				{ name = "buffer", keyword_length = 5 },
-			}),
-		})
-	end,
-})
 
 vim.api.nvim_create_user_command("DebugAttachPublish", function()
 	local dap = require("dap")

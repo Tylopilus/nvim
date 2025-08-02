@@ -192,19 +192,7 @@ return { -- LSP Configuration & Plugins
 					})
 				end,
 			},
-			jdtls = {
-				settings = {
-					java = {
-						compile = {
-							nullAnalysis = {
-								mode = "automatic",
-								nonnull = "org.eclipse.jdt.annotation.Nonnull",
-								nullable = "org.eclipse.jdt.annotation.Nullable",
-							},
-						},
-					},
-				},
-			},
+			lemminx = {},
 		}
 
 		-- Ensure the servers and tools above are installed
@@ -218,12 +206,13 @@ return { -- LSP Configuration & Plugins
 		-- You can add other tools here that you want Mason to install
 		-- for you, so that they are available from within Neovim.
 		local ensure_installed = vim.tbl_keys(servers or {})
-		vim.list_extend(ensure_installed, { "stylelint", "stylua" })
+		vim.list_extend(ensure_installed, { "stylelint", "stylua", "prettierd", "prettier" })
 		require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
 		require("mason-lspconfig").setup({
 			ensure_installed = servers,
-			automatic_installation = true,
+			automatic_installation = false,
+			automatic_enable = false,
 			handlers = {
 				function(server_name)
 					local server = servers[server_name] or {}
@@ -234,6 +223,18 @@ return { -- LSP Configuration & Plugins
 					require("lspconfig")[server_name].setup(server)
 				end,
 				jdtls = function()
+					require("java").servers = {
+						jdtls = {
+							settings = {
+								java = {
+									runtimes = {
+										name = "JavaSE-21",
+										path = "/usr/lib/jvm/java-21-openjdk-amd64/bin",
+									},
+								},
+							},
+						},
+					}
 					require("java").setup({
 						-- Your custom jdtls settings goes here
 						spring_boot_tools = {
@@ -242,12 +243,12 @@ return { -- LSP Configuration & Plugins
 						},
 						java_test = {
 							enable = true,
-							version = "0.43.0",
+							version = "0.43.1",
 						},
 						jdk = {
 							-- install jdk using mason.nvim
-							auto_install = true,
-							version = "17.0.2",
+							auto_install = false,
+							version = "21.0.7",
 						},
 					})
 
