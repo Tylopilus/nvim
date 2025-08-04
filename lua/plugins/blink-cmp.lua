@@ -14,7 +14,7 @@ return {
 	---@type blink.cmp.Config
 	opts = {
 		enabled = function()
-			return not vim.tbl_contains({ "markdown", "oil" }, vim.bo.filetype)
+			return not vim.tbl_contains({ "oil" }, vim.bo.filetype)
 		end,
 		-- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
 		-- 'super-tab' for mappings similar to vscode (tab to accept)
@@ -36,24 +36,31 @@ return {
 			nerd_font_variant = "mono",
 		},
 
-		-- (Default) Only show the documentation popup when manually triggered
-		-- completion = { documentation = { auto_show = false }, menu = { auto_show = true } },
-		keyword = { range = "full" },
-		-- Insert completion item on selection, don't select by default
-		list = { selection = "auto_insert" },
-		menu = {
-			-- nvim-cmp style menu
-			draw = {
-				columns = {
-					{ "label", "label_description", gap = 1 },
-					{ "kind_icon", "kind" },
+		completion = {
+			trigger = {
+				show_on_insert = false,
+				show_on_trigger_character = false,
+			},
+			keyword = { range = "full" },
+			-- Insert completion item on selection, don't select by default
+			list = { selection = { auto_insert = true } },
+			ghost_text = { enabled = true, show_with_menu = false },
+			-- Show documentation when selecting a completion item
+			documentation = { auto_show = true, auto_show_delay_ms = 500 },
+			menu = {
+				auto_show = false,
+				-- nvim-cmp style menu
+				draw = {
+					columns = {
+						{ "label", "label_description", gap = 1 },
+						{ "kind_icon", "kind" },
+					},
 				},
 			},
 		},
-		-- Show documentation when selecting a completion item
-		documentation = { auto_show = true, auto_show_delay_ms = 500 },
+		-- (Default) Only show the documentation popup when manually triggered
+		-- completion = { documentation = { auto_show = false }, menu = { auto_show = true } },
 		-- Display a preview of the selected item on the current line
-		ghost_text = { enabled = true },
 
 		cmdline = {
 			keymap = { preset = "super-tab" },
