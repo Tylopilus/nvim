@@ -6,6 +6,7 @@ return { -- LSP Configuration & Plugins
 		{ "williamboman/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
 		"williamboman/mason-lspconfig.nvim",
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		"nvim-java/nvim-java",
 		"https://gitlab.com/schrieveslaach/sonarlint.nvim",
 
 		-- Useful status updates for LSP.
@@ -25,10 +26,20 @@ return { -- LSP Configuration & Plugins
 			},
 		},
 		{ "Bilal2453/luvit-meta", lazy = true },
-		{
-			"mfussenegger/nvim-jdtls",
-			ft = "java",
-		},
+		-- {
+		-- 	"pmizio/typescript-tools.nvim",
+		-- 	dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+		-- 	opts = {},
+		-- 	config = function()
+		-- 		require("typescript-tools").setup({
+		-- 			handlers = {
+		-- 				["textDocument/publishDiagnostics"] = require("typescript-tools.api").filter_diagnostics({
+		-- 					80001,
+		-- 				}),
+		-- 			},
+		-- 		})
+		-- 	end,
+		-- },
 	},
 	config = function()
 		vim.api.nvim_create_autocmd("LspAttach", {
@@ -181,6 +192,14 @@ return { -- LSP Configuration & Plugins
 					},
 				},
 			},
+			-- eslint = {
+			-- 	on_attach = function(_, bufnr)
+			-- 		vim.api.nvim_create_autocmd("BufWritePre", {
+			-- 			buffer = bufnr,
+			-- 			command = "EslintFixAll",
+			-- 		})
+			-- 	end,
+			-- },
 		}
 
 		-- Ensure the servers and tools above are installed
@@ -194,7 +213,7 @@ return { -- LSP Configuration & Plugins
 		-- You can add other tools here that you want Mason to install
 		-- for you, so that they are available from within Neovim.
 		local ensure_installed = vim.tbl_keys(servers or {})
-		vim.list_extend(ensure_installed, { "prettierd", "jdtls", "java-debug-adapter", "java-test" })
+		vim.list_extend(ensure_installed, { "prettierd" })
 		require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
 		require("mason-lspconfig").setup({
@@ -211,215 +230,100 @@ return { -- LSP Configuration & Plugins
 					require("lspconfig")[server_name].setup(server)
 				end,
 				jdtls = function()
-					-- Setup jdtls via autocmd to ensure proper initialization
-					vim.api.nvim_create_autocmd("FileType", {
-						pattern = "java",
-						callback = function()
-							local jdtls = require("jdtls")
+					require("java").servers = {}
+					require("java").setup({
+						-- Your custom jdtls settings goes here
+						spring_boot_tools = {
+							enable = false,
+							version = "*",
+						},
+						java_test = {
+							enable = true,
+							version = "0.43.1",
+						},
+						jdk = {
+							-- install jdk using mason.nvim
+							auto_install = false,
+							version = "21",
+						},
+					})
 
-							-- Paths
-							local mason_path = vim.fn.stdpath("data") .. "/mason/packages"
-							local jdtls_path = mason_path .. "/jdtls"
-							local java_debug_path = mason_path .. "/java-debug-adapter"
-							local java_test_path = mason_path .. "/java-test"
-
-							local launcher_jar =
-								vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
-
-							if launcher_jar == "" then
-								vim.notify(
-									"jdtls not found. Please install it via Mason (:Mason)",
-									vim.log.levels.ERROR
-								)
-								return
-							end
-
-							local platform_config = jdtls_path .. "/config_linux" -- Adjust for your OS
-
-							-- AEM-aware root detection
-							local root_markers = {
-								"gradlew",
-								"mvnw",
-								".git",
-								"pom.xml",
-								"build.gradle",
-								"build.gradle.kts",
-								".content.xml",
-								"ui.apps",
-							}
-							local root_dir = require("jdtls.setup").find_root(root_markers)
-							if not root_dir then
-								return
-							end
-
-							local project_name = vim.fn.fnamemodify(root_dir, ":p:h:t")
-							local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. project_name
-
-							-- Debug and test bundles
-							local bundles = {}
-							if vim.fn.isdirectory(java_debug_path) == 1 then
-								vim.list_extend(
-									bundles,
-									vim.split(
-										vim.fn.glob(
-											java_debug_path .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"
-										),
-										"\n"
-									)
-								)
-							end
-							if vim.fn.isdirectory(java_test_path) == 1 then
-								vim.list_extend(
-									bundles,
-									vim.split(vim.fn.glob(java_test_path .. "/extension/server/*.jar"), "\n")
-								)
-							end
-
-							-- Lombok jar
-							local lombok_jar = vim.fn.expand("~/.local/share/nvim/java-jars/lombok.jar")
-
-							local config = {
-								cmd = {
-									"/usr/lib/jvm/java-1.21.0-openjdk-amd64/bin/java",
-									"-Declipse.application=org.eclipse.jdt.ls.core.id1",
-									"-Dosgi.bundles.defaultStartLevel=4",
-									"-Declipse.product=org.eclipse.jdt.ls.core.product",
-									"-Dlog.protocol=true",
-									"-Dlog.level=ALL",
-									"-Xms1g",
-									"-Xmx2g",
-									"--add-modules=ALL-SYSTEM",
-									"--add-opens",
-									"java.base/java.util=ALL-UNNAMED",
-									"--add-opens",
-									"java.base/java.lang=ALL-UNNAMED",
-								},
-
-								root_dir = root_dir,
-
-								settings = {
-									java = {
-										eclipse = { downloadSources = true },
-										configuration = {
-											updateBuildConfiguration = "interactive",
-											-- Use your existing Java runtime configuration
-											runtimes = {
-												{
-													name = "JavaSE-21",
-													path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64",
-													default = true,
-												},
-											},
-										},
-										maven = {
-											downloadSources = true,
-											updateSnapshots = true, -- For AEM snapshots
-										},
-										implementationsCodeLens = { enabled = true },
-										referencesCodeLens = { enabled = true },
-										references = { includeDecompiledSources = true },
-										format = { enabled = true },
-										compile = {
-											nullAnalysis = {
-												mode = "automatic",
-												-- More aggressive null analysis
-												nonnull = {
-													"org.jetbrains.annotations.NotNull",
-													"javax.annotation.Nonnull",
-													"org.springframework.lang.NonNull",
-													"lombok.NonNull",
-												},
-												nullable = {
-													"org.jetbrains.annotations.Nullable",
-													"javax.annotation.Nullable",
-													"org.springframework.lang.Nullable",
-												},
-												-- Enable secondary null analysis
-												secondary = {
-													enabled = true,
-												},
-											},
-										},
-										-- Enhanced completion for blink
-										completion = {
-											maxResults = 50,
-											enabled = true,
-											guessMethodArguments = true,
-										},
-										signatureHelp = {
-											enabled = true,
-											description = { enabled = true },
-										},
-										-- AEM-specific settings
-										sources = {
-											organizeImports = {
-												starThreshold = 99,
-												staticStarThreshold = 99,
-											},
-										},
-										errors = {
-											incompleteClasspath = "warning",
-											-- Show null analysis problems as errors
-											nullAnalysis = "error",
+					require("lspconfig").jdtls.setup({
+						settings = {
+							java = {
+								configuration = {
+									runtimes = {
+										{
+											name = "JavaSE-21",
+											path = "/usr/lib/jvm/java-1.21.0-openjdk-amd64",
+											default = true,
 										},
 									},
-									signatureHelp = { enabled = true },
-									contentProvider = { preferred = "fernflower" },
-									extendedClientCapabilities = jdtls.extendedClientCapabilities,
 								},
-
-								init_options = {
-									bundles = bundles,
-								},
-
-								capabilities = capabilities,
-
-								-- Use your existing progress handler
-								handlers = {
-									["$/progress"] = function(_, result, ctx) end,
-									-- Map null warnings to errors
-									["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
-										if result and result.diagnostics then
-											result.diagnostics = vim.tbl_filter(function(diagnostic)
-												if diagnostic.code == "536871895" then
-													return false
-												end
-
-												return true -- Keep this diagnostic
-											end, result.diagnostics)
-											for _, diagnostic in ipairs(result.diagnostics) do
-												if diagnostic.code == "536871364" then
-													diagnostic.severity = vim.diagnostic.severity.ERROR
-												end
-											end
-										end
-										vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
-									end,
-								},
-							}
-
-							-- Add Lombok support if jar exists
-							if vim.fn.filereadable(lombok_jar) == 1 then
-								table.insert(config.cmd, "-javaagent:" .. lombok_jar)
-							end
-
-							-- Add launcher jar and config
-							vim.list_extend(config.cmd, {
-								"-jar",
-								launcher_jar,
-								"-configuration",
-								platform_config,
-								"-data",
-								workspace_dir,
-							})
-
-							-- Start jdtls
-							jdtls.start_or_attach(config)
-						end,
-						group = vim.api.nvim_create_augroup("jdtls_setup", { clear = true }),
+							},
+						},
+						handlers = {
+							-- By assigning an empty function, you can remove the notifications
+							-- printed to the cmd
+							["$/progress"] = function(_, result, ctx) end,
+						},
 					})
 				end,
+				-- stylelint_lsp = function()
+				-- 	require("lspconfig").stylelint_lsp.setup({
+				-- 		filetypes = { "css", "scss" },
+				-- 		root_dir = require("lspconfig").util.root_pattern("package.json", ".git"),
+				-- 		settings = {
+				-- 			stylelintplus = {
+				-- 				-- see available options in stylelint-lsp documentation
+				-- 			},
+				-- 		},
+				-- 		on_attach = function(client)
+				-- 			client.server_capabilities.document_formatting = false
+				-- 		end,
+				-- 	})
+				-- end,
 			},
 		})
+
+		-- require("sonarlint").setup({
+		-- 	server = {
+		-- 		cmd = {
+		-- 			"sonarlint-language-server",
+		-- 			-- Ensure that sonarlint-language-server uses stdio channel
+		-- 			"-stdio",
+		-- 			"-analyzers",
+		-- 			-- paths to the analyzers you need, using those for python and java in this example
+		-- 			vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarpython.jar"),
+		-- 			vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarcfamily.jar"),
+		-- 			vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarjava.jar"),
+		-- 			vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarhtml.jar"),
+		-- 		},
+		-- 		settings = {
+		-- 			sonarlint = {
+		-- 				rules = {
+		-- 					["java:S1075"] = { level = "off" },
+		-- 				},
+		-- 			},
+		-- 		},
+		-- 	},
+		-- 	filetypes = {
+		-- 		-- Tested and working
+		-- 		"java",
+		-- 		"html",
+		-- 		"python",
+		-- 		"cpp",
+		-- 	},
+		-- })
+		-- LSP Configurations
+		vim.lsp.config["zig-notes"] = {
+			cmd = { "/home/helge/dev/projects/zig-notes/zig-out/bin/zig-notes-lsp" },
+			filetypes = { "markdown" },
+			settings = {},
+			root_dir = "/home/helge/work-wiki/work"
+		}
+
+		-- Enable LSPs
+		-- vim.lsp.enable({ "zig-notes" })
 	end,
 }
