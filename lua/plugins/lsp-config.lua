@@ -276,7 +276,7 @@ return { -- LSP Configuration & Plugins
 							end
 
 							-- Lombok jar
-							local lombok_jar = vim.fn.expand("~/.local/share/nvim/java-jars/lombok.jar")
+							local lombok_jar = vim.fn.expand(jdtls_path  .. "/lombok.jar")
 
 							local config = {
 								cmd = {
