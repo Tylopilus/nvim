@@ -94,6 +94,15 @@ return {
                     projectName = "eplan-rittal-cloud.core",
 					port = "8887",
 				},
+				{
+					type = "java",
+					request = "attach",
+					name = "aem guides wknd author",
+					hostName = "localhost",
+                    mainClass = "aem-guides-wknd.core",
+                    projectName = "aem-guides-wknd.core",
+					port = "8888",
+				},
 			}
 
 			vim.keymap.set("n", "<space>db", dap.toggle_breakpoint)

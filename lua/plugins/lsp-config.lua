@@ -75,6 +75,9 @@ return { -- LSP Configuration & Plugins
 				-- Execute a code action, usually your cursor needs to be on top of an error
 				-- or a suggestion from your LSP for this to activate.
 				map("<leader>ca", "<Cmd>lua vim.lsp.buf.code_action()<cr>", "[C]ode [A]ction")
+				vim.keymap.set("v", "<leader>ca", function()
+					vim.lsp.buf.code_action()
+				end, { buffer = event.buf, desc = "[C]ode [A]ction" })
 
 				-- WARN: This is not Goto Definition, this is Goto Declaration.
 				--  For example, in C this would take you to the header.
@@ -241,19 +244,28 @@ return { -- LSP Configuration & Plugins
 								"gradlew",
 								"mvnw",
 								".git",
-								"pom.xml",
+								-- "pom.xml",
 								"build.gradle",
 								"build.gradle.kts",
-								".content.xml",
-								"ui.apps",
 							}
 							local root_dir = require("jdtls.setup").find_root(root_markers)
 							if not root_dir then
 								return
 							end
 
-							local project_name = vim.fn.fnamemodify(root_dir, ":p:h:t")
-							local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. project_name
+							local function setup_workspace()
+								local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+								local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. project_name
+
+								-- Remove existing workspace
+								-- vim.fn.system("rm -rf " .. workspace_dir)
+
+								-- Create fresh workspace directory
+								vim.fn.mkdir(workspace_dir, "p")
+
+								return workspace_dir
+							end
+							local workspace_dir = setup_workspace()
 
 							-- Debug and test bundles
 							local bundles = {}
@@ -276,24 +288,33 @@ return { -- LSP Configuration & Plugins
 							end
 
 							-- Lombok jar
-							local lombok_jar = vim.fn.expand(jdtls_path  .. "/lombok.jar")
+							local lombok_jar = vim.fn.expand(jdtls_path .. "/lombok.jar")
+
+							-- Build JVM arguments with Lombok agent positioned correctly
+							local jvm_args = {
+								"-Declipse.application=org.eclipse.jdt.ls.core.id1",
+								"-Dosgi.bundles.defaultStartLevel=4",
+								"-Declipse.product=org.eclipse.jdt.ls.core.product",
+								"-Dlog.protocol=true",
+								"-Dlog.level=ALL",
+								"-Xms1g",
+								"-Xmx2g",
+								"--add-modules=ALL-SYSTEM",
+								"--add-opens",
+								"java.base/java.util=ALL-UNNAMED",
+								"--add-opens",
+								"java.base/java.lang=ALL-UNNAMED",
+							}
+
+							-- Add Lombok agent BEFORE other jar arguments
+							if vim.fn.filereadable(lombok_jar) == 1 then
+								table.insert(jvm_args, "-javaagent:" .. lombok_jar)
+							end
 
 							local config = {
-								cmd = {
+								cmd = vim.list_extend({
 									"/usr/lib/jvm/java-1.21.0-openjdk-amd64/bin/java",
-									"-Declipse.application=org.eclipse.jdt.ls.core.id1",
-									"-Dosgi.bundles.defaultStartLevel=4",
-									"-Declipse.product=org.eclipse.jdt.ls.core.product",
-									"-Dlog.protocol=true",
-									"-Dlog.level=ALL",
-									"-Xms1g",
-									"-Xmx2g",
-									"--add-modules=ALL-SYSTEM",
-									"--add-opens",
-									"java.base/java.util=ALL-UNNAMED",
-									"--add-opens",
-									"java.base/java.lang=ALL-UNNAMED",
-								},
+								}, jvm_args),
 
 								root_dir = root_dir,
 
@@ -301,7 +322,7 @@ return { -- LSP Configuration & Plugins
 									java = {
 										eclipse = { downloadSources = true },
 										configuration = {
-											updateBuildConfiguration = "interactive",
+											updateBuildConfiguration = "automatic",
 											-- Use your existing Java runtime configuration
 											runtimes = {
 												{
@@ -362,6 +383,9 @@ return { -- LSP Configuration & Plugins
 											-- Show null analysis problems as errors
 											nullAnalysis = "error",
 										},
+										autobuild = {
+											enabled = true,
+										},
 									},
 									signatureHelp = { enabled = true },
 									contentProvider = { preferred = "fernflower" },
@@ -370,6 +394,7 @@ return { -- LSP Configuration & Plugins
 
 								init_options = {
 									bundles = bundles,
+									extendedClientCapabilities = jdtls.extendedClientCapabilities,
 								},
 
 								capabilities = capabilities,
@@ -397,11 +422,6 @@ return { -- LSP Configuration & Plugins
 									end,
 								},
 							}
-
-							-- Add Lombok support if jar exists
-							if vim.fn.filereadable(lombok_jar) == 1 then
-								table.insert(config.cmd, "-javaagent:" .. lombok_jar)
-							end
 
 							-- Add launcher jar and config
 							vim.list_extend(config.cmd, {

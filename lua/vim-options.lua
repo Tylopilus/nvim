@@ -15,7 +15,7 @@ vim.opt.incsearch = true
 vim.opt.scrolloff = 8
 vim.opt.wrap = false
 vim.opt.textwidth = 80
-vim.diagnostic.config({virtual_text=false})
+vim.diagnostic.config({ virtual_text = false })
 
 -- Navigate vim panes better
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
@@ -36,15 +36,22 @@ vim.keymap.set("n", "Y", '"+y')
 vim.keymap.set("v", "Y", '"+y')
 vim.keymap.set("n", "yY", '"+y$')
 -- Quickfix list
-vim.keymap.set("n", "<leader>qq", vim.diagnostic.setqflist, { desc = "Open diagnostics in [q]uickfix list"});
-vim.keymap.set("n", "<C-[>", "<cmd>:cprevious<CR>", {desc = "Go previous entry in quickfix list"})
-vim.keymap.set("n", "<C-]>", "<cmd>:cnext<CR>", {desc = "Go next entry in quickfix list"})
-vim.keymap.set('n', '<C-\\>', function()
-    for _, win in pairs(vim.fn.getwininfo()) do
-        if win.quickfix == 1 then
-            vim.cmd('cclose')
-            return
-        end
-    end
-    vim.cmd('copen')
+vim.keymap.set("n", "<leader>qq", function()
+	local diagnostics = vim.diagnostic.get(0) -- 0 = current buffer
+	vim.fn.setqflist({}, "r", {
+		title = "Current Buffer Diagnostics",
+		items = vim.diagnostic.toqflist(diagnostics),
+	})
+	vim.cmd("copen")
+end, { desc = "Open current buffer diagnostics in quickfix list" })
+vim.keymap.set("n", "<C-[>", "<cmd>:cprevious<CR>", { desc = "Go previous entry in quickfix list" })
+vim.keymap.set("n", "<C-]>", "<cmd>:cnext<CR>", { desc = "Go next entry in quickfix list" })
+vim.keymap.set("n", "<C-\\>", function()
+	for _, win in pairs(vim.fn.getwininfo()) do
+		if win.quickfix == 1 then
+			vim.cmd("cclose")
+			return
+		end
+	end
+	vim.cmd("copen")
 end)
