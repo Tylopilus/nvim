@@ -57,3 +57,22 @@ vim.api.nvim_create_user_command("DebugAttachPublish", function()
 	}
 	dap.continue()
 end, {})
+
+vim.api.nvim_create_user_command('PRReview', function(opts)
+  -- Default to comparing against origin/develop, but allow override
+  local base_branch = opts.args ~= '' and opts.args or 'origin/develop'
+  
+  -- Change gitsigns base to compare against the target branch
+  require('gitsigns').change_base(base_branch, true)
+  
+  -- Get all changed files and populate quickfix
+  local files = vim.fn.systemlist('git diff --name-only ' .. base_branch)
+  local qf_list = {}
+  for _, file in ipairs(files) do
+    table.insert(qf_list, {filename = file, lnum = 1, text = 'Changed in PR'})
+  end
+  vim.fn.setqflist(qf_list)
+  vim.cmd('copen')
+  
+  print('PR review mode: comparing against ' .. base_branch)
+end, {nargs = '?'})

@@ -3,10 +3,9 @@ return { -- LSP Configuration & Plugins
 	"neovim/nvim-lspconfig",
 	dependencies = {
 		-- Automatically install LSPs and related tools to stdpath for Neovim
-		{ "williamboman/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
-		"williamboman/mason-lspconfig.nvim",
+		{ "mason-org/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
+		"mason-org/mason-lspconfig.nvim",
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
-		"https://gitlab.com/schrieveslaach/sonarlint.nvim",
 
 		-- Useful status updates for LSP.
 		-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -186,6 +185,7 @@ return { -- LSP Configuration & Plugins
 			},
 		}
 
+
 		-- Ensure the servers and tools above are installed
 		--  To check the current status of installed tools and/or manually install
 		--  other tools, you can run
@@ -211,7 +211,8 @@ return { -- LSP Configuration & Plugins
 					-- by the server configuration above. Useful when disabling
 					-- certain features of an LSP (for example, turning off formatting for tsserver)
 					server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-					require("lspconfig")[server_name].setup(server)
+					vim.lsp.config(server_name, server);
+					vim.lsp.enable(server_name)
 				end,
 				jdtls = function()
 					-- Setup jdtls via autocmd to ensure proper initialization
@@ -247,6 +248,7 @@ return { -- LSP Configuration & Plugins
 								-- "pom.xml",
 								"build.gradle",
 								"build.gradle.kts",
+								"jpm.toml",
 							}
 							local root_dir = require("jdtls.setup").find_root(root_markers)
 							if not root_dir then

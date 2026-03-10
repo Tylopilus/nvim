@@ -5,17 +5,20 @@ return {
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope-live-grep-args.nvim",
-		"nvim-telescope/telescope-ui-select.nvim"
+		"nvim-telescope/telescope-ui-select.nvim",
 	},
 	cond = not vim.g.vscode,
 	config = function()
 		local lga_actions = require("telescope-live-grep-args.actions")
 		require("telescope").setup({
 			defaults = {
+				layout_strategy = "horizontal",
 				layout_config = {
-					width = 0.7,
 					horizontal = {
-						preview_width = 0.6,
+						prompt_position = "top",
+						width = { padding = 0 },
+						height = { padding = 0 },
+						preview_width = 0.5,
 					},
 				},
 				mappings = {
@@ -24,7 +27,7 @@ return {
 					},
 				},
 				preview = {
-					hide_on_startup = true, -- hide previewer when picker starts
+					hide_on_startup = false, -- hide previewer when picker starts
 				},
 				path_display = {
 					trunctate = 2,
