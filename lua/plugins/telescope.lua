@@ -79,6 +79,14 @@ return {
 			":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
 			{ desc = "Search across all files" }
 		)
+		vim.keymap.set("v", "<leader>/", function()
+			local saved = vim.fn.getreg('"')
+			local saved_regtype = vim.fn.getregtype("'")
+			vim.cmd('noau normal! "zy');
+			local selection = vim.fn.getreg('z'):gsub('\n', '')
+			vim.fn.setreg('"', saved, saved_regtype)
+			require('telescope').extensions.live_grep_args.live_grep_args({ default_text = selection })
+		end, { desc = "Search selected text" })
 		vim.keymap.set("n", "?", builtin.grep_string, {})
 		vim.keymap.set("n", "<leader><space>", builtin.buffers, { desc = "[ ] Find existing buffers" })
 	end,

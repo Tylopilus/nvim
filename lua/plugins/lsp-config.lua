@@ -170,6 +170,7 @@ return { -- LSP Configuration & Plugins
 					client.server_capabilities.documentFormattingProvider = false
 					client.server_capabilities.documentRangeFormattingProvider = false
 				end,
+				root_markers = { ".git", "tsconfig.json", "jsconfig.json", "package.json" },
 				settings = {
 					javascript = {
 						format = {
@@ -184,7 +185,6 @@ return { -- LSP Configuration & Plugins
 				},
 			},
 		}
-
 
 		-- Ensure the servers and tools above are installed
 		--  To check the current status of installed tools and/or manually install
@@ -211,7 +211,7 @@ return { -- LSP Configuration & Plugins
 					-- by the server configuration above. Useful when disabling
 					-- certain features of an LSP (for example, turning off formatting for tsserver)
 					server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-					vim.lsp.config(server_name, server);
+					vim.lsp.config(server_name, server)
 					vim.lsp.enable(server_name)
 				end,
 				jdtls = function()
