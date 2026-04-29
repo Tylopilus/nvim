@@ -1,33 +1,4 @@
 return {
-	-- {
-	-- 	"projekt0n/github-nvim-theme",
-	-- 	cond = not vim.g.vscode,
-	-- 	lazy = false,
-	-- 	priority = 1000,
-	-- 	config = function()
-	-- 		require("github-theme").setup({
-	-- 			palettes = {
-	-- 				-- Custom duskfox with black background
-	-- 			},
-	-- 		})
-	-- 		vim.cmd.colorscheme("github_dark_dimmed")
-	-- 	end,
-	-- },
-	{
-		"catppuccin/nvim",
-		cond = not vim.g.vscode,
-		name = "catppuccin",
-	},
-	-- {
-	--     "olivercederborg/poimandres.nvim",
-	--     cond = not vim.g.vscode,
-	--     lazy = false,
-	--     priority = 1000,
-	--
-	--     config = function()
-	--         vim.cmd.colorscheme("poimandres")
-	--     end,
-	-- },
 	{
 		"folke/tokyonight.nvim",
 		priority = 1000,
@@ -69,8 +40,6 @@ return {
 					colors.fg_gutter = fg_gutter
 					colors.fg_sidebar = fg_dark
 					colors.terminal.cyan_bright = fg
-					colors.bg_popup = fg
-					colors.bg_search = fg
 				end,
 				on_highlights = function(hl, c)
 					hl.TelescopeResultsNormal = {
