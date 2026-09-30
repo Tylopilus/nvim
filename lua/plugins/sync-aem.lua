@@ -1,7 +1,5 @@
-return {
-  {
-    "tylopilus/sync-aem.nvim",
-    opts = {},
-  },
-  -- Your other plugins...
-}
+vim.pack.add({
+	"https://github.com/tylopilus/sync-aem.nvim",
+})
+
+require("sync-aem").setup({})

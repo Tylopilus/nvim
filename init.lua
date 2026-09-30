@@ -1,20 +1,14 @@
----@diagnostic disable: undefined-global
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-	vim.fn.system({
-		"git",
-		"clone",
-		"--filter=blob:none",
-		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable", -- latest stable release
-		lazypath,
-	})
-end
-vim.opt.rtp:prepend(lazypath)
+require("config.options")
+require("config.keymaps")
 
-require("vim-options")
-require("vim-commands")
-require("lazy").setup("plugins")
+-- Inside VS Code (vscode-neovim) only editing behaviour is wanted; VS Code
+-- provides the UI, LSP, git and file navigation.
 if vim.g.vscode then
-	require("vscode-config")
+	require("plugins.surround")
+	require("config.vscode")
+	return
 end
+
+require("config.ui")
+require("config.commands")
+require("plugins")

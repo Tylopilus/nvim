@@ -1,23 +1,4 @@
-vim.g.mapleader = " "
-
-vim.opt.nu = true
-vim.opt.relativenumber = true
-
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
-vim.opt.shiftwidth = 4
-vim.opt.expandtab = true
-
-vim.opt.smartindent = true
-
-vim.opt.hlsearch = false
-vim.opt.incsearch = true
-vim.opt.scrolloff = 8
-vim.opt.wrap = false
-vim.opt.textwidth = 80
-vim.diagnostic.config({ virtual_text = false })
-
--- Navigate vim panes better
+-- Move selected lines
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
@@ -44,8 +25,6 @@ vim.keymap.set("n", "<leader>qq", function()
 	})
 	vim.cmd("copen")
 end, { desc = "Open current buffer diagnostics in quickfix list" })
-vim.keymap.set("n", "<C-[>", "<cmd>:cprevious<CR>", { desc = "Go previous entry in quickfix list" })
-vim.keymap.set("n", "<C-]>", "<cmd>:cnext<CR>", { desc = "Go next entry in quickfix list" })
 vim.keymap.set("n", "<C-\\>", function()
 	for _, win in pairs(vim.fn.getwininfo()) do
 		if win.quickfix == 1 then

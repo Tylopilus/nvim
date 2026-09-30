@@ -1,3 +1,5 @@
-return {
-    { "folke/which-key.nvim", opts = {}, cond = not vim.g.vscode },
-}
+vim.pack.add({
+	"https://github.com/folke/which-key.nvim",
+})
+
+require("which-key").setup({})

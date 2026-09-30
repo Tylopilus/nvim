@@ -1,4 +1,1 @@
-return {
-  "tpope/vim-surround",
-  -- cond = not vim.g.vscode,
-}
+vim.pack.add({ "https://github.com/tpope/vim-surround" })
