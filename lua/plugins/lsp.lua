@@ -17,6 +17,7 @@ require("mason-tool-installer").setup({
 		"lua-language-server",
 		"typescript-language-server",
 		"prettierd",
+		"stylua",
 		"jdtls",
 		"java-debug-adapter",
 		"java-test",

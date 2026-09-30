@@ -67,15 +67,19 @@ end
 --- The edit blocks turning `from` into `to`: {start_a, count_a, start_b, count_b}.
 --- Consecutive changed lines stay in one block; applying only part of a block
 --- could break the code.
-local function edit_blocks(from, to)
-	return vim.text.diff(join_lines(from), join_lines(to), { result_type = "indices" })
+local function edit_blocks(from, to, algorithm)
+	return vim.text.diff(join_lines(from), join_lines(to), { result_type = "indices", algorithm = algorithm })
 end
+
+--- Diff algorithms to try: they line up the original and the formatted text
+--- differently, and a misaligned diff can pair unrelated lines.
+local ALGORITHMS = { "histogram", "patience", "myers", "minimal" }
 
 --- `original` with only the formatting blocks applied that touch `ranges`.
 ---@return string[]
-local function merge_within(original, formatted, ranges)
+local function merge_within(original, formatted, ranges, algorithm)
 	local result = vim.deepcopy(original)
-	local blocks = edit_blocks(original, formatted)
+	local blocks = edit_blocks(original, formatted, algorithm)
 	-- bottom-up, so earlier line numbers stay valid
 	for i = #blocks, 1, -1 do
 		local start_a, count_a, start_b, count_b = unpack(blocks[i])
@@ -113,6 +117,31 @@ local function apply(bufnr, original, lines)
 	end
 end
 
+local line_ranges_supported
+
+--- Whether the prettier on PATH, with the config for this buffer's file, has
+--- the lineRanges option of the prettier-plugin-java fork. Without it prettier
+--- would ignore the option and format the whole file. Checked once per session.
+local function prettier_supports_line_ranges(bufnr)
+	if line_ranges_supported == nil then
+		local script = [[
+			const { execFileSync } = require("node:child_process");
+			const { realpathSync } = require("node:fs");
+			const path = require("node:path");
+			(async () => {
+				const bin = execFileSync("sh", ["-c", "command -v prettier"], { encoding: "utf8" }).trim();
+				const prettier = await import(path.resolve(path.dirname(realpathSync(bin)), "..", "index.mjs"));
+				const config = (await prettier.resolveConfig(process.argv[1])) ?? {};
+				const { options } = await prettier.getSupportInfo({ plugins: config.plugins ?? [] });
+				process.exit(options.some((option) => option.name === "lineRanges") ? 0 : 1);
+			})().catch(() => process.exit(1));
+		]]
+		local result = vim.system({ "node", "-e", script, vim.api.nvim_buf_get_name(bufnr) }):wait()
+		line_ranges_supported = result.code == 0
+	end
+	return line_ranges_supported
+end
+
 --- Formats the given line ranges of the buffer, or the lines changed since
 --- HEAD when no ranges are given.
 ---@param opts? {bufnr?: integer, ranges?: LineRange[]}
@@ -136,7 +165,11 @@ function M.format(opts)
 		return f.name
 	end, conform.list_formatters_to_run(bufnr))
 
-	if vim.bo[bufnr].filetype == "java" and vim.deep_equal(formatters, { "prettier" }) then
+	if
+		vim.bo[bufnr].filetype == "java"
+		and vim.deep_equal(formatters, { "prettier" })
+		and prettier_supports_line_ranges(bufnr)
+	then
 		-- prettier formats exactly these lines itself (see append_args in plugins/conform.lua)
 		vim.b[bufnr].prettier_line_ranges = table.concat(
 			vim.tbl_map(function(range)
@@ -176,25 +209,34 @@ function M.format(opts)
 			vim.notify("Format failed: " .. (err and err.message or "no output"), vim.log.levels.ERROR)
 			return
 		end
-		local merged = merge_within(original, formatted, ranges)
-		if vim.deep_equal(merged, original) then
-			return
-		end
-		-- the formatter must still accept the result: never apply a partial format that breaks the code
-		format_text(merged, function(check_err)
-			if check_err then
+
+		-- A correct partial format differs from the original only in formatting,
+		-- so formatting it fully gives the same text as formatting the original.
+		-- This rejects misaligned merges, e.g. a method that ends up duplicated.
+		local function try(i)
+			if i > #ALGORITHMS then
 				vim.notify(
-					"Formatting only the changed lines would break the code; use <leader>F to format the whole file",
+					"Can't format only the changed lines here; use <leader>F to format the whole file",
 					vim.log.levels.WARN
 				)
 				return
 			end
-			if vim.api.nvim_buf_get_changedtick(bufnr) ~= tick then
-				vim.notify("Buffer changed while formatting, not applied", vim.log.levels.WARN)
+			local merged = merge_within(original, formatted, ranges, ALGORITHMS[i])
+			if vim.deep_equal(merged, original) then
 				return
 			end
-			apply(bufnr, original, merged)
-		end)
+			format_text(merged, function(check_err, reformatted)
+				if check_err or not vim.deep_equal(reformatted, formatted) then
+					return try(i + 1)
+				end
+				if vim.api.nvim_buf_get_changedtick(bufnr) ~= tick then
+					vim.notify("Buffer changed while formatting, not applied", vim.log.levels.WARN)
+					return
+				end
+				apply(bufnr, original, merged)
+			end)
+		end
+		try(1)
 	end)
 end
 

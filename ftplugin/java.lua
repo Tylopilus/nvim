@@ -75,7 +75,27 @@ if vim.fn.filereadable(lombok_jar) == 1 then
 	table.insert(jvm_args, "-javaagent:" .. lombok_jar)
 end
 
-local java_home = "/home/helge/.sdkman/candidates/java/21.0.2-open"
+-- The JDK that runs jdtls and builds the projects: $JAVA_HOME (SDKMAN points it
+-- at its current JDK), else the one of `java` on PATH. jdtls needs Java 21+.
+local java_home = vim.env.JAVA_HOME
+if not java_home or java_home == "" then
+	local java = vim.fn.exepath("java")
+	java_home = java ~= "" and vim.fs.dirname(vim.fs.dirname(vim.uv.fs_realpath(java))) or nil
+end
+if not java_home then
+	vim.notify("jdtls: no JDK found, set JAVA_HOME or put java on PATH", vim.log.levels.ERROR)
+	return
+end
+
+-- Major version from the JDK's release file, e.g. JAVA_VERSION="21.0.2" -> 21
+local java_version
+for _, line in ipairs(vim.fn.readfile(java_home .. "/release")) do
+	java_version = java_version or tonumber(line:match('^JAVA_VERSION="(%d+)'))
+end
+if java_version and java_version < 21 then
+	vim.notify(("jdtls: needs Java 21 or newer, JAVA_HOME is Java %d"):format(java_version), vim.log.levels.ERROR)
+	return
+end
 
 local config = {
 	cmd = vim.list_extend({ java_home .. "/bin/java" }, jvm_args),
@@ -88,13 +108,13 @@ local config = {
 			configuration = {
 				updateBuildConfiguration = "automatic",
 				-- Use your existing Java runtime configuration
-				runtimes = {
+				runtimes = java_version and {
 					{
-						name = "JavaSE-21",
+						name = "JavaSE-" .. java_version,
 						path = java_home,
 						default = true,
 					},
-				},
+				} or nil,
 			},
 			maven = {
 				downloadSources = true,

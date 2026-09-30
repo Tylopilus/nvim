@@ -1,0 +1,243 @@
+#!/usr/bin/env node
+// Formats only the lines changed since the last commit (HEAD) with prettier.
+//
+//   prettier-changed <file>...
+//
+// Uses the prettier on PATH with its usual config and plugins. How only the
+// changed lines are formatted depends on what the language supports:
+//
+// - Java: the lineRanges option of the prettier-plugin-java fork
+//   (github.com/Tylopilus/prettier-java).
+// - JavaScript, TypeScript, JSON, GraphQL, Vue: prettier's rangeStart/rangeEnd,
+//   once per changed block, bottom-up.
+// - Everything else (CSS, SCSS, Less, Markdown, YAML, HTML, XML, ...): the file
+//   is formatted in memory and only the formatting changes that touch changed
+//   lines are applied. If the result no longer parses, the file is left alone.
+//
+// Files git does not track yet are formatted completely.
+"use strict";
+
+const { execFileSync, spawnSync } = require("node:child_process");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { pathToFileURL } = require("node:url");
+
+/** Parsers for which prettier itself can format a range (see isSourceElement in prettier). */
+const RANGE_PARSERS = new Set([
+	"acorn",
+	"babel",
+	"babel-flow",
+	"babel-ts",
+	"espree",
+	"flow",
+	"graphql",
+	"json",
+	"json-stringify",
+	"json5",
+	"jsonc",
+	"meriyah",
+	"typescript",
+	"vue",
+]);
+
+const MARKDOWN_PARSERS = new Set(["markdown", "mdx"]);
+
+async function loadPrettier() {
+	const bin = execFileSync("sh", ["-c", "command -v prettier"], { encoding: "utf8" }).trim();
+	const packageDir = path.resolve(path.dirname(fs.realpathSync(bin)), "..");
+	return import(pathToFileURL(path.join(packageDir, "index.mjs")).href);
+}
+
+function git(args, options = {}) {
+	return spawnSync("git", args, { encoding: "utf8", maxBuffer: 1 << 28, ...options });
+}
+
+/**
+ * Hunks of a unified diff with zero context: [oldStart, oldCount, newStart, newCount].
+ */
+function parseHunks(diff) {
+	const hunks = [];
+	for (const match of diff.matchAll(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/gm)) {
+		hunks.push([+match[1], match[2] ?? 1, +match[3], match[4] ?? 1].map(Number));
+	}
+	return hunks;
+}
+
+/**
+ * Lines (1-based, inclusive) changed since HEAD, or null when git does not
+ * track the file. A pure deletion marks the lines around the gap.
+ */
+function changedRanges(file) {
+	// run git next to the file, so it works from any directory
+	const cwd = path.dirname(path.resolve(file));
+	const name = path.basename(file);
+	if (git(["ls-files", "--error-unmatch", "--", name], { cwd }).status !== 0) {
+		return null;
+	}
+	const diff = git(["diff", "-U0", "--no-color", "HEAD", "--", name], { cwd }).stdout;
+	return parseHunks(diff).map(([, , start, count]) => {
+		const first = Math.max(start, 1);
+		return count === 0 ? [first, first + 1] : [first, first + count - 1];
+	});
+}
+
+/**
+ * Diff algorithms to try: they line up the original and the formatted text
+ * differently, and a misaligned diff can pair unrelated lines.
+ */
+const ALGORITHMS = ["histogram", "patience", "myers", "minimal"];
+
+/** Line-level edits turning `from` into `to`, from git's diff. */
+function lineEdits(from, to, algorithm) {
+	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "prettier-changed-"));
+	try {
+		fs.writeFileSync(path.join(dir, "a"), from);
+		fs.writeFileSync(path.join(dir, "b"), to);
+		const diff = git(["diff", "--no-index", "-U0", "--no-color", `--diff-algorithm=${algorithm}`, "a", "b"], {
+			cwd: dir,
+		}).stdout;
+		return parseHunks(diff);
+	} finally {
+		fs.rmSync(dir, { recursive: true, force: true });
+	}
+}
+
+/** The ignore files at the root of the file's repository, like the prettier CLI uses. */
+function ignoreFiles(file) {
+	const root = git(["rev-parse", "--show-toplevel"], { cwd: path.dirname(path.resolve(file)) });
+	const dir = root.status === 0 ? root.stdout.trim() : process.cwd();
+	return [".gitignore", ".prettierignore"].map((name) => path.join(dir, name));
+}
+
+function touches(first, last, ranges) {
+	return ranges.some(([start, end]) => first <= end && last >= start);
+}
+
+/**
+ * `text` with only those formatting edits applied that touch `ranges`. An edit
+ * is a block of consecutive changed lines. With `lineByLine`, a block that
+ * keeps its number of lines maps line to line, so only its lines within the
+ * ranges are applied; any other block is applied whole, since part of it
+ * could break the code.
+ */
+function applyWithin(text, formatted, ranges, lineByLine, algorithm) {
+	const lines = text.split("\n");
+	const formattedLines = formatted.split("\n");
+	const edits = lineEdits(text, formatted, algorithm);
+	for (const [oldStart, oldCount, newStart, newCount] of edits.reverse()) {
+		if (lineByLine && oldCount === newCount) {
+			for (let i = 0; i < oldCount; i++) {
+				if (touches(oldStart + i, oldStart + i, ranges)) {
+					lines[oldStart - 1 + i] = formattedLines[newStart - 1 + i];
+				}
+			}
+			continue;
+		}
+		// a pure insertion (oldCount 0) goes after line oldStart
+		const first = oldStart;
+		const last = oldCount === 0 ? oldStart + 1 : oldStart + oldCount - 1;
+		if (touches(first, last, ranges)) {
+			const from = oldCount === 0 ? oldStart : oldStart - 1;
+			lines.splice(from, oldCount, ...formattedLines.slice(newStart - 1, newStart - 1 + newCount));
+		}
+	}
+	return lines.join("\n");
+}
+
+/** Offset of the start of 1-based `line` in `text`. */
+function lineOffset(text, line) {
+	let offset = 0;
+	for (let i = 1; i < line && offset !== -1; i++) {
+		offset = text.indexOf("\n", offset) + 1 || -1;
+	}
+	return offset === -1 ? text.length : offset;
+}
+
+async function supportsLineRanges(prettier, options) {
+	const { options: supported } = await prettier.getSupportInfo({ plugins: options.plugins ?? [] });
+	return supported.some((option) => option.name === "lineRanges");
+}
+
+async function formatChanged(prettier, file) {
+	const config = (await prettier.resolveConfig(file, { editorconfig: true })) ?? {};
+	const info = await prettier.getFileInfo(file, {
+		ignorePath: ignoreFiles(file),
+		plugins: config.plugins ?? [],
+	});
+	if (info.ignored) {
+		return "ignored";
+	}
+	if (!info.inferredParser) {
+		return "skipped, prettier cannot format this file type";
+	}
+	const options = { ...config, filepath: file, parser: info.inferredParser };
+	const text = fs.readFileSync(file, "utf8");
+	const ranges = changedRanges(file);
+
+	let result;
+	if (ranges === null) {
+		result = await prettier.format(text, options);
+	} else if (ranges.length === 0) {
+		return "no changes since HEAD";
+	} else if (info.inferredParser === "java" && (await supportsLineRanges(prettier, options))) {
+		const lineRanges = ranges.map(([start, end]) => `${start}-${end}`).join(",");
+		result = await prettier.format(text, { ...options, lineRanges });
+	} else if (RANGE_PARSERS.has(info.inferredParser)) {
+		// one range per run; bottom-up, so the lines of the ranges above stay put
+		result = text;
+		for (const [start, end] of [...ranges].reverse()) {
+			result = await prettier.format(result, {
+				...options,
+				rangeStart: lineOffset(result, start),
+				rangeEnd: lineOffset(result, end + 1),
+			});
+		}
+	} else {
+		// In Markdown a line can't be formatted on its own: e.g. a different bullet
+		// character starts a new list
+		const lineByLine = !MARKDOWN_PARSERS.has(info.inferredParser);
+		const formatted = await prettier.format(text, options);
+		// A correct partial format differs from the original only in formatting,
+		// so formatting it fully gives the same text as formatting the original.
+		// This rejects misaligned merges, e.g. a method that ends up duplicated.
+		result = undefined;
+		for (const algorithm of ALGORITHMS) {
+			const merged = applyWithin(text, formatted, ranges, lineByLine, algorithm);
+			const reformatted = await prettier.format(merged, options).catch(() => null);
+			if (reformatted === formatted) {
+				result = merged;
+				break;
+			}
+		}
+		if (result === undefined) {
+			return "not formatted: can't format only the changed lines here; format the whole file instead";
+		}
+	}
+
+	if (result === text) {
+		return "unchanged";
+	}
+	fs.writeFileSync(file, result);
+	return ranges === null ? "formatted (new file)" : "formatted changed lines";
+}
+
+async function main(files) {
+	if (files.length === 0) {
+		console.error("usage: prettier-changed <file>...");
+		return 2;
+	}
+	const prettier = await loadPrettier();
+	let failed = false;
+	for (const file of files) {
+		try {
+			console.log(`${file}: ${await formatChanged(prettier, file)}`);
+		} catch (error) {
+			failed = true;
+			console.error(`${file}: ${error.message ?? error}`);
+		}
+	}
+	return failed ? 1 : 0;
+}
+
+main(process.argv.slice(2)).then((code) => process.exit(code));
