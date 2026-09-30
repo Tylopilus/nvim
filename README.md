@@ -85,6 +85,13 @@ git clone https://github.com/Tylopilus/outrigger ~/dev/projects/outrigger
 cd ~/dev/projects/outrigger && mvn package
 ```
 
+To analyse the implementations of AEM interfaces (`PageManager`, `Asset`, ...),
+point it at a local AEM's bundles in `~/.config/outrigger/config.properties`:
+
+```properties
+implementations=~/dev/eplan/AEM/publish/crx-quickstart/launchpad/felix
+```
+
 ## Formatting
 
 - `<leader>f` formats only the lines changed since the last commit, a visual
